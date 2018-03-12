@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.YassineOnlineBank.dao.RoleDao;
 import com.YassineOnlineBank.dao.UserDao;
@@ -15,6 +16,7 @@ import com.YassineOnlineBank.models.User;
 import com.YassineOnlineBank.models.UserRole;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);

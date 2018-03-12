@@ -1,5 +1,6 @@
 package com.YassineOnlineBank.web;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.YassineOnlineBank.dao.RoleDao;
+import com.YassineOnlineBank.models.PrimaryAccount;
+import com.YassineOnlineBank.models.SavingsAccount;
 import com.YassineOnlineBank.models.User;
 import com.YassineOnlineBank.models.UserRole;
 import com.YassineOnlineBank.services.UserService;
@@ -55,5 +58,15 @@ public class IndexController {
 			userService.createUser(user, userRoles );
 			return "redirect:/index";
 		}
+	}
+	
+	@GetMapping("/dashboard")
+	public String dashboard(Principal p, Model model) {
+		User loggedInUser = userService.findByUsername(p.getName());
+		PrimaryAccount pAcc = loggedInUser.getPrimaryAccount();
+		SavingsAccount sAcc = loggedInUser.getSavingsAccount();
+		model.addAttribute("primaryAccount", pAcc);
+		model.addAttribute("savingsAccount", sAcc);
+		return "dashboard";
 	}
 }
