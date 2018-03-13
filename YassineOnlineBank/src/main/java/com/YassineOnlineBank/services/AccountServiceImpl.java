@@ -3,13 +3,16 @@ package com.YassineOnlineBank.services;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.YassineOnlineBank.dao.AccountDao;
+import com.YassineOnlineBank.dao.RecipientDao;
 import com.YassineOnlineBank.models.PrimaryAccount;
 import com.YassineOnlineBank.models.PrimaryTransaction;
+import com.YassineOnlineBank.models.Recipient;
 import com.YassineOnlineBank.models.SavingsAccount;
 import com.YassineOnlineBank.models.SavingsTransaction;
 import com.YassineOnlineBank.models.User;
@@ -24,7 +27,8 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private AccountDao accountDao;
 
-
+    @Autowired
+    private RecipientDao recipientDao;
 
     @Autowired
     private UserService userService;
@@ -135,6 +139,31 @@ public class AccountServiceImpl implements AccountService {
             transactionService.saveSavingsDepositTransaction(savingsTransaction);
 		}
 	}
+	
+	@Override
+	public Recipient addRecipient(Recipient recipient, Principal p) {
+		User user = userService.findByUsername(p.getName());
+		recipient.setUser(user);
+		Recipient newRecipient = recipientDao.save(recipient);
+		return newRecipient ;
+	}
+	
+	@Override
+	public void deleteRecipientById(Long id) {
+        recipientDao.delete(id);
+    }
+	
+	@Override
+	public Recipient findRecipientById(Long id) {
+        return recipientDao.findOne(id);
+    }
+	
+	@Override
+	public List<Recipient> getRecipientList(Principal p) {
+		User user = userService.findByUsername(p.getName());
+		List<Recipient> recipientList = user.getRecipientList();
+        return recipientList;
+    }
 	
 	private int accountGen() {
         return ++nextAccountNumber;
