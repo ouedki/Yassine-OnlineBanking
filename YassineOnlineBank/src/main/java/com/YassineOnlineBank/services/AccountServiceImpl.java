@@ -100,8 +100,43 @@ public class AccountServiceImpl implements AccountService {
             transactionService.saveSavingsWithdrawTransaction(savingsTransaction);
         }
     }
-    
-    private int accountGen() {
+
+	@Override
+	public void transferBtwAcc(String acctTo, String acctFrom, double amount, PrimaryTransaction pt,
+			SavingsTransaction st, Principal p) {
+		User user = userService.findByUsername(p.getName());
+		if (acctTo.equalsIgnoreCase("Primary") && acctFrom.equalsIgnoreCase("Savings")) {
+			PrimaryAccount primaryAccount = user.getPrimaryAccount();
+			SavingsAccount savingsAccount = user.getSavingsAccount();
+			primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().add(new BigDecimal(amount)));
+			savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(new BigDecimal(amount)));
+			accountDao.save(primaryAccount);
+			accountDao.save(savingsAccount);
+
+            Date date = new Date();
+            
+            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Transfer from Savings to Primary Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
+            SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Transfer from Savings to Primary Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
+            transactionService.savePrimaryWithdrawTransaction(primaryTransaction);
+            transactionService.saveSavingsDepositTransaction(savingsTransaction);
+		} else if (acctFrom.equalsIgnoreCase("Primary") && acctTo.equalsIgnoreCase("Savings")) {
+			PrimaryAccount primaryAccount = user.getPrimaryAccount();
+			SavingsAccount savingsAccount = user.getSavingsAccount();
+			primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(new BigDecimal(amount)));
+			savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().add(new BigDecimal(amount)));
+			accountDao.save(primaryAccount);
+			accountDao.save(savingsAccount);
+
+            Date date = new Date();
+            
+            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Transfer from Primary to Savings Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
+            SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Transfer from Primary to Savings Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
+            transactionService.savePrimaryWithdrawTransaction(primaryTransaction);
+            transactionService.saveSavingsDepositTransaction(savingsTransaction);
+		}
+	}
+	
+	private int accountGen() {
         return ++nextAccountNumber;
     }
 
