@@ -68,5 +68,19 @@ public class AccountContoller {
 		accountService.deposit(accountType, Double.parseDouble(amount), p);
 		return "redirect:/dashboard";
 	}
+	
+	@GetMapping("/account-withdraw")
+	public String withdraw(Model m) {
+		m.addAttribute("accountType", "");
+		m.addAttribute("amount", "");
+		return "withdraw";
+	}
+	
+	@PostMapping("/account-withdraw")
+	public String saveWithdraw(@ModelAttribute("amount") String amount, 
+			@ModelAttribute("accountType") String accountType, Model m, Principal p) {
+		accountService.withdraw(accountType, Double.parseDouble(amount), p);
+		return "redirect:/dashboard";
+	}
 
 }

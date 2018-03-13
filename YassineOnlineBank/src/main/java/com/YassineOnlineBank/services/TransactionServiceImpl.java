@@ -48,5 +48,17 @@ public class TransactionServiceImpl implements TransactionService{
 		savingsTransactionDao.save(st);
 		
 	}
+	
+	@Override
+	public void savePrimaryWithdrawTransaction(PrimaryTransaction pt) {
+		primaryTransactionDao.save(pt);
+		
+	}
+
+	@Override
+	public void saveSavingsWithdrawTransaction(SavingsTransaction st) {
+		savingsTransactionDao.save(st);
+		
+	}
 
 }
