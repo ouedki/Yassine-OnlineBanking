@@ -17,9 +17,11 @@ import javax.persistence.InheritanceType;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn (name = "ACC_TYPE", 
 discriminatorType = DiscriminatorType.STRING, length=2)
-public class Account implements Serializable {
+public abstract class Account implements Serializable {
 
-    @Id
+	private static final long serialVersionUID = 1L;
+	
+	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private int accountNumber;

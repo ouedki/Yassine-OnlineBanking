@@ -1,6 +1,7 @@
 package com.YassineOnlineBank.services;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.YassineOnlineBank.dao.AccountDao;
 import com.YassineOnlineBank.models.PrimaryAccount;
+import com.YassineOnlineBank.models.PrimaryTransaction;
 import com.YassineOnlineBank.models.SavingsAccount;
+import com.YassineOnlineBank.models.SavingsTransaction;
+import com.YassineOnlineBank.models.User;
 
 
 
@@ -25,8 +29,8 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private UserService userService;
     
-//    @Autowired
-//    private TransactionService transactionService;
+    @Autowired
+    private TransactionService transactionService;
 
     public PrimaryAccount createPrimaryAccount() {
         PrimaryAccount primaryAccount = new PrimaryAccount();
@@ -50,30 +54,30 @@ public class AccountServiceImpl implements AccountService {
         return (SavingsAccount) accountDao.findByAccountNumber(savingsAccount.getAccountNumber());
     }
     
-//    public void deposit(String accountType, double amount, Principal principal) {
-//        User user = userService.findByUsername(principal.getName());
-//
-//        if (accountType.equalsIgnoreCase("Primary")) {
-//            PrimaryAccount primaryAccount = user.getPrimaryAccount();
-//            primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().add(new BigDecimal(amount)));
-//            primaryAccountDao.save(primaryAccount);
-//
-//            Date date = new Date();
-//
-//            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Deposit to Primary Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
-//            transactionService.savePrimaryDepositTransaction(primaryTransaction);
-//            
-//        } else if (accountType.equalsIgnoreCase("Savings")) {
-//            SavingsAccount savingsAccount = user.getSavingsAccount();
-//            savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().add(new BigDecimal(amount)));
-//            savingsAccountDao.save(savingsAccount);
-//
-//            Date date = new Date();
-//            SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Deposit to savings Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
-//            transactionService.saveSavingsDepositTransaction(savingsTransaction);
-//        }
-//    }
-//    
+    public void deposit(String accountType, double amount, Principal principal) {
+        User user = userService.findByUsername(principal.getName());
+
+        if (accountType.equalsIgnoreCase("Primary")) {
+            PrimaryAccount primaryAccount = user.getPrimaryAccount();
+            primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().add(new BigDecimal(amount)));
+            accountDao.save(primaryAccount);
+
+            Date date = new Date();
+
+            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Deposit to Primary Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
+            transactionService.savePrimaryDepositTransaction(primaryTransaction);
+            
+        } else if (accountType.equalsIgnoreCase("Savings")) {
+            SavingsAccount savingsAccount = user.getSavingsAccount();
+            savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().add(new BigDecimal(amount)));
+            accountDao.save(savingsAccount);
+
+            Date date = new Date();
+            SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Deposit to savings Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
+            transactionService.saveSavingsDepositTransaction(savingsTransaction);
+        }
+    }
+    
 //    public void withdraw(String accountType, double amount, Principal principal) {
 //        User user = userService.findByUsername(principal.getName());
 //
