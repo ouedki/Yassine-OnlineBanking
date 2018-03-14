@@ -19,4 +19,5 @@ public interface AccountService {
     void deleteRecipientById(Long id);
     Recipient findRecipientById(Long id);
     List<Recipient> getRecipientList(Principal p);
+	void transferToRec(String accountType, String recipientName, double amount,PrimaryTransaction pt, SavingsTransaction st, Principal p);
 }

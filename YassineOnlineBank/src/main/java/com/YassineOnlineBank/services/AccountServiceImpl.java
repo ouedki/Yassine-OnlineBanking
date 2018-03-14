@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.YassineOnlineBank.dao.AccountDao;
 import com.YassineOnlineBank.dao.RecipientDao;
@@ -20,6 +21,7 @@ import com.YassineOnlineBank.models.User;
 
 
 @Service
+@Transactional
 public class AccountServiceImpl implements AccountService {
 	
 	private static int nextAccountNumber = 11111111;
@@ -164,6 +166,41 @@ public class AccountServiceImpl implements AccountService {
 		List<Recipient> recipientList = user.getRecipientList();
         return recipientList;
     }
+	
+	@Override
+	public void transferToRec(String accountType, String recipientName, double amount,PrimaryTransaction pt, SavingsTransaction st, Principal p) {
+		User user = userService.findByUsername(p.getName());
+		if (accountType.equals("Primary")) {
+			PrimaryAccount primaryAccount = user.getPrimaryAccount();
+			PrimaryAccount recipientAcc = userService.findByUsername(recipientName).getPrimaryAccount();
+			primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(new BigDecimal(amount)));
+			recipientAcc.setAccountBalance(recipientAcc.getAccountBalance().add(new BigDecimal(amount)));
+			accountDao.save(primaryAccount);
+			accountDao.save(recipientAcc);
+			
+			Date date = new Date();
+            
+            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Transfer from Primary to " + recipientName, "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
+            PrimaryTransaction recipientPrimaryTransaction = new PrimaryTransaction(date, "Transfer from " + user.getFirstName() , "Account", "Finished", amount, recipientAcc.getAccountBalance(), recipientAcc);
+            transactionService.savePrimaryWithdrawTransaction(primaryTransaction);
+            transactionService.savePrimaryDepositTransaction(recipientPrimaryTransaction);
+            
+		} else if (accountType.equals("Savings")) {
+			SavingsAccount savingsAccount = user.getSavingsAccount();
+			PrimaryAccount recipientAcc = userService.findByUsername(recipientName).getPrimaryAccount();
+			savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(new BigDecimal(amount)));
+			recipientAcc.setAccountBalance(recipientAcc.getAccountBalance().add(new BigDecimal(amount)));
+			accountDao.save(savingsAccount);
+			accountDao.save(recipientAcc);
+			
+			Date date = new Date();
+            
+            SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Transfer from savings to " + recipientName, "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
+            PrimaryTransaction recipientPrimaryTransaction = new PrimaryTransaction(date, "Transfer from " + user.getFirstName() , "Account", "Finished", amount, recipientAcc.getAccountBalance(), recipientAcc);
+            transactionService.saveSavingsWithdrawTransaction(savingsTransaction);
+            transactionService.savePrimaryDepositTransaction(recipientPrimaryTransaction);
+		}
+	}
 	
 	private int accountGen() {
         return ++nextAccountNumber;

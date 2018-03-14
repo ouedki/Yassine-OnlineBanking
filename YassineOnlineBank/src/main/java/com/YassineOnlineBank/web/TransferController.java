@@ -72,5 +72,21 @@ public class TransferController {
 		m.addAttribute("recipientList", recipientList);
 		return "recipient";
 	}
-
+	
+	@GetMapping("/transfer-toSomeoneElse")
+	public String transferToRecipientForm(Model m, Principal p) {
+		List<Recipient> recipientList = accountService.getRecipientList(p);
+		m.addAttribute("recipientList", recipientList);
+		m.addAttribute("accountType", "");
+		return "toSomeoneElse";
+	}
+	
+	@PostMapping("/transfer-toSomeoneElse")
+	public String transferToRecipient(@ModelAttribute(name="accountType") String accountType, 
+			@ModelAttribute(name="recipientName") String recipientName, 
+			@ModelAttribute(name="amount") String amount, 
+			Principal p, PrimaryTransaction pt, SavingsTransaction st) {
+		accountService.transferToRec(accountType, recipientName, Double.parseDouble(amount), pt, st, p);
+		return "redirect:/dashboard";
+	}
 }
